@@ -1,0 +1,4 @@
+(library
+ (name test_markdown_helper)
+ (libraries alcotest ligo-markdown-tester.markdown_helper)
+ (synopsis "Tests for ligo-markdown-tester"))

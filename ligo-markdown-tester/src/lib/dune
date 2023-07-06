@@ -1,0 +1,24 @@
+
+(ocamllex md)
+
+(library
+ (name common)
+ (modules common)
+ (flags (:standard))
+ (libraries core)
+ (public_name ligo-markdown-tester.common))
+
+(library
+ (name markdown_helper)
+ (modules markdown_helper md)
+ (public_name ligo-markdown-tester.markdown_helper)
+ (libraries unix str core stdio common)
+ (synopsis "This is a short description of the helper.markdown library."))
+
+(library
+ (name compilation_helper)
+ (modules compilation_helper)
+ (public_name ligo-markdown-tester.compilation_helper)
+ (libraries unix str core stdio common)
+ (synopsis "This is a short description of the helper.markdown library."))
+
