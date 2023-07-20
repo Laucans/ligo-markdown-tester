@@ -5,6 +5,11 @@ type snippet_content = string
 type filepath = string
 type imports_groups = string list
 
+(* Expression must be default value *)
+type interpretation_type =
+  | Declaration
+  | Expression
+
 (* Interpret must be default value, None to skip compilation *)
 type compilation =
   | Interpret
@@ -15,6 +20,19 @@ type compilation =
 
 type execution_result = int
 type execution_result_details = string
+
+let interpretation_type_to_string compilation =
+  match compilation with
+  | Declaration -> "Declaration"
+  | Expression -> "Expression"
+
+
+let interpretation_type_from_string s =
+  match String.lowercase_ascii s with
+  | "declaration" -> Declaration
+  | "expression" -> Expression
+  | _ -> failwith "unrecognized interpretation_type type"
+
 
 let compilation_to_string compilation =
   match compilation with
@@ -54,7 +72,7 @@ module SnippetsGroup = Map.Make (struct
   let compare a b = compare a b
 end)
 
-type snippetsmap = (snippet_content * compilation) SnippetsGroup.t
+type snippetsmap = (snippet_content * compilation * interpretation_type) SnippetsGroup.t
 
 type snippets_result_map =
   (snippet_content * compilation * execution_result * execution_result_details)
@@ -72,11 +90,14 @@ let _print_group key (_syntax, content) =
 
 let print_snippetsmap (snippets : snippetsmap) : unit =
   SnippetsGroup.iter
-    (fun (syntax, group_name) (content, compilation) ->
+    (fun (syntax, group_name) (content, compilation, interpretation_type) ->
       Format.printf "Syntax: %s\n" syntax;
       Format.printf "Group: %s\n" group_name;
       Format.printf "Content:\n%s\n" content;
       Format.printf "Compilation: %s\n" (compilation_to_string compilation);
+      Format.printf
+        "Interpretation_type:\n%s\n"
+        (interpretation_type_to_string interpretation_type);
       Format.printf "*******************\n")
     snippets
 

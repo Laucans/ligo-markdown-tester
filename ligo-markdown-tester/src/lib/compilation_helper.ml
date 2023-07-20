@@ -75,6 +75,7 @@ let find_snippet_file_for_command_file group syntax : filepath option =
 
 
 let execute_command command : int * string =
+  Printf.printf "\nExecute %s" command;
   let ic = Unix.open_process_in command in
   let all_output = Buffer.create 1024 in
   let exit_code =
@@ -115,20 +116,31 @@ let compile_snippets_map ligo_executable (snippets_list : snippetsmap list) : re
     List.fold_left
       (fun acc snippets ->
         SnippetsGroup.fold
-          (fun (syntax, group_name) (content, compilation) acc ->
+          (fun (syntax, group_name) (content, compilation, interpretation_type) acc ->
             let filename =
               write_snippet_to_file (syntax, group_name) (content, compilation)
             in
             let return_code, details =
               match compilation with
               | Interpret ->
-                execute_command
-                  (ligo_executable
-                   ^ " run interpret  --syntax "
-                   ^ syntax
-                   ^ " \"$(cat "
-                   ^ filename
-                   ^ ")\" 2>&1")
+                (match interpretation_type with
+                 | Declaration ->
+                   (* In this case, we want to transform the declaration into an expression to be interpretable *)
+                   execute_command
+                     (ligo_executable
+                      ^ " run interpret  --syntax "
+                      ^ syntax
+                      ^ " \"module ASFJNISFX = struct $(cat "
+                      ^ filename
+                      ^ ") end in () \" 2>&1")
+                 | Expression ->
+                   execute_command
+                     (ligo_executable
+                      ^ " run interpret  --syntax "
+                      ^ syntax
+                      ^ " \"$(cat "
+                      ^ filename
+                      ^ ")\" 2>&1"))
               | Contract ->
                 execute_command
                   (ligo_executable ^ " compile contract " ^ filename ^ " 2>&1")

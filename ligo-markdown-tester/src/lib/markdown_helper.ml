@@ -46,7 +46,14 @@ let sort_md_args (args_list : Md.arg list) : Md.arg list =
   List.sort ~compare:compare_args args_list
 
 
-let generate_snippetsmap_entry grp_names syntax compilation contents grp_map : snippetsmap
+let generate_snippetsmap_entry
+  grp_names
+  syntax
+  compilation
+  contents
+  grp_map
+  interpretation_type
+  : snippetsmap
   =
   let groups = String.split_on_chars ~on:[ ';' ] grp_names in
   List.fold_left groups ~init:grp_map ~f:(fun grp_map name ->
@@ -54,10 +61,16 @@ let generate_snippetsmap_entry grp_names syntax compilation contents grp_map : s
       (syntax, name)
       (fun arg_content ->
         match arg_content with
-        | Some (ct, _) ->
+        | Some (ct, _, _) ->
           Some
-            (String.concat ~sep:"\n" (ct :: contents), compilation_from_string compilation)
-        | _ -> Some (String.concat ~sep:"\n" contents, compilation_from_string compilation))
+            ( String.concat ~sep:"\n" (ct :: contents)
+            , compilation_from_string compilation
+            , interpretation_type_from_string interpretation_type )
+        | _ ->
+          Some
+            ( String.concat ~sep:"\n" contents
+            , compilation_from_string compilation
+            , interpretation_type_from_string interpretation_type ))
       grp_map)
 
 
@@ -95,6 +108,7 @@ let get_groups md_file : snippetsmap option =
               match arg with
               | Md.NameValue ("syntax", _)
               | Md.NameValue ("group", _)
+              | Md.NameValue ("interpretation-type", _)
               | Md.NameValue ("compilation", _) -> ()
               | Md.Field _ | Md.NameValue (_, _) ->
                 failwith
@@ -106,22 +120,25 @@ let get_groups md_file : snippetsmap option =
             el.arguments
         in
         let args = add_default_arg "compilation" "interpret" el.arguments in
+        let args = add_default_arg "interpretation-type" "expression" args in
         let args = add_default_arg "group" "ungrouped" args in
+        let args = add_default_arg "syntax" "" args in
         let args = sort_md_args args in
         (match args with
          (* Every possibilities with group syntax and compilation*)
-         | [ Md.NameValue ("compilation", compilation); Md.NameValue ("group", names) ] ->
-           generate_snippetsmap_entry names s compilation el.contents grp_map
          | [ Md.NameValue ("compilation", compilation)
            ; Md.NameValue ("group", names)
+           ; Md.NameValue ("interpretation-type", interpretation_type)
            ; Md.NameValue ("syntax", syntax)
            ] ->
+           let syntax = if String.equal "" syntax then syntax else syntax ^ "." in
            generate_snippetsmap_entry
              names
-             (syntax ^ "." ^ s)
+             (syntax ^ s)
              compilation
              el.contents
              grp_map
+             interpretation_type
          | args ->
            let () =
              List.iter

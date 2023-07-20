@@ -30,7 +30,9 @@ Language can be jsligo, cameligo or zsh (in case of shell script)
 - syntax: If the language does not match with the syntax, you can override the syntax with syntax attribute
   - cameligo 
   - jsligo
-
+- interpretation-type : interpretation-type=declaration
+  - Expression : Default value, nothing happen
+  - Declaration : When the snippet is interpreted, it'll be transformed to an expression, surrounding the code with `module ASFJNISFX = struct` and `end in ()`
 
 ## Examples
 
