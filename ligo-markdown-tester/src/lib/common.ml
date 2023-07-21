@@ -198,3 +198,7 @@ let write_report_list_to_html_file (report : report_list) (filename : string) : 
     report;
   Out_channel.output_string oc "</table>\n";
   Out_channel.close oc
+
+let check_report_for_errors (report : report_list) : int =
+  let has_errors = Caml.List.exists (fun snippets -> SnippetsGroup.exists (fun _ (_, _, execution_result, _) -> execution_result <> 0) snippets) report in
+  if has_errors then  1 else 0

@@ -1,5 +1,5 @@
 (executables
  (names main)
  (public_names ligo-markdown-tester)
- (libraries ligo-markdown-tester.markdown_helper ligo-markdown-tester.compilation_helper)
+ (libraries ligo-markdown-tester.markdown_helper ligo-markdown-tester.compilation_helper ligo-markdown-tester.common)
  (package ligo-markdown-tester))

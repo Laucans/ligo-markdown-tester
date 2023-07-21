@@ -11,7 +11,6 @@ open Printf
    command-line arguments.
 *)
 
-let walk _argv_offset = print_endline "Nice."
 
 let run argv_offset =
   if Array.length (Core.Sys.get_argv ()) <= argv_offset
@@ -21,12 +20,11 @@ let run argv_offset =
   let directory = (Core.Sys.get_argv ()).(2) in
   let ligo_executable = (Core.Sys.get_argv ()).(3) in
   let snippets = Markdown_helper.parse_markdowns directory in
-  let _ = Compilation_helper.compile_snippets_map ligo_executable snippets in
-  ()
-
+  let report = Compilation_helper.compile_snippets_map ligo_executable snippets in
+  exit (Common.check_report_for_errors report)
 
 (* Add your own subcommands as needed. *)
-let subcommands = [ "run", run; "walk", walk ]
+let subcommands = [ "run", run; ]
 
 let help () =
   let subcommand_names =
